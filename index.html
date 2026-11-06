@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hedi ❤️ Hanok</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ min-height:100vh;
+ background:radial-gradient(ellipse at top,#51264e,#1b102b 60%,#0d0918);
+ color:white;
+ font-family:Tahoma,Arial,sans-serif;
+}
+.screen{
+ display:none;
+ min-height:100vh;
+ align-items:center;
+ justify-content:center;
+ padding:16px;
+}
+.screen.active{display:flex}
+.panel{
+ width:min(760px,100%);
+ padding:25px 17px;
+ text-align:center;
+ border:1px solid #ffffff30;
+ border-radius:25px;
+ background:#ffffff0d;
+ box-shadow:0 18px 60px #0007;
+}
+h1{color:#ffd4e4;font-size:clamp(25px,5vw,38px)}
+p{line-height:2;color:#f8eaf1;font-size:16px}
+button{
+ border:0;
+ border-radius:30px;
+ padding:14px 26px;
+ margin:9px;
+ background:linear-gradient(120deg,#ff4e91,#ff9ab9);
+ color:white;
+ font-size:16px;
+ font-weight:bold;
+ cursor:pointer;
+}
+button:disabled{opacity:.4}
+#art{
+ width:100%;
+ height:auto;
+ display:block;
+ margin:12px auto;
+ border-radius:16px;
+ background:#130d24;
+}
+input{
+ width:min(340px,90%);
+ padding:14px;
+ border-radius:13px;
+ border:1px solid #ff8bb4;
+ background:#21152e;
+ color:white;
+ font-size:18px;
+ text-align:center;
+ margin:12px;
+}
+#error{color:#ff9bb9;min-height:25px}
+.message{
+ min-height:150px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:22px;
+ margin:25px 0;
+ border-radius:20px;
+ background:#ff70a51c;
+ border:1px solid #ffffff25;
+ font-size:20px;
+ line-height:2.2;
+ animation:appear .6s ease;
+}
+@keyframes appear{
+ from{opacity:0;transform:translateY(20px)}
+ to{opacity:1;transform:translateY(0)}
+}
+.counter{color:#ffc1d8;font-size:14px}
+</style>
+</head>
+
+<body>
+
+<!-- هەنگاوی یەکەم -->
+<section class="screen active" id="s1">
+<div class="panel">
+<h1>❤️ تەنها بۆ تۆ ❤️</h1>
+<p>چاوەڕێ بکە، دڵەکان بۆ تۆ دروست دەبن... ✨</p>
+
+<canvas id="art" width="720" height="440"></canvas>
+
+<p id="status">کارەکتەرەکە ئامادەی تەقەکردنە 💗</p>
+
+<button id="next1" disabled onclick="showScreen(2)">
+بەردەوام بە 💕
+</button>
+</div>
+</section>
+
+<!-- هەنگاوی دووەم -->
+<section class="screen" id="s2">
+<div class="panel">
+<div style="font-size:55px">🌹💗🌹</div>
+
+<h1>بەخێربێیت هەنۆکەی جوانم</h1>
+
+<p>
+هێدی بە هەموو دڵییەوە پێت دەڵێت:
+بەخێربێیت ڕووناکیی دڵم.
+ئەم شوێنە بچووکە تەنها بۆ تۆیە،
+چونکە تۆ شایەنی جوانترین شتەکانیت. 🥹❤️
+</p>
+
+<button onclick="showScreen(3)">
+هەنگاوی داهاتوو 🔐
+</button>
+</div>
+</section>
+
+<!-- هەنگاوی سێیەم -->
+<section class="screen" id="s3">
+<div class="panel">
+<div style="font-size:55px">🔐🗝️</div>
+
+<h1>کلیلەکە بدۆزەرەوە</h1>
+
+<p>
+ناوی جوانترین کەس لە ژیانی تۆدا چییە؟ 💞
+</p>
+
+<input id="answer" placeholder="ناوەکە لێرە بنووسە...">
+
+<div id="error"></div>
+
+<button onclick="unlock()">
+کردنەوەی دڵەکە ❤️
+</button>
+</div>
+</section>
+
+<!-- هەنگاوی چوارەم -->
+<section class="screen" id="s4">
+<div class="panel">
+
+<div style="font-size:48px">💌💖💌</div>
+
+<h1>١٠ پەیامی تایبەت بۆ تۆ</h1>
+
+<div class="counter" id="counter">پەیامی ١ لە ١٠</div>
+
+<div class="message" id="message"></div>
+
+<button id="nextMessage" onclick="nextMsg()">
+پەیامی داهاتوو 💗
+</button>
+
+<p id="endText"></p>
+
+</div>
+</section>
+
+<script>
+
+/* گۆڕینی هەنگاوەکان */
+
+function showScreen(n){
+ document.querySelectorAll('.screen').forEach(s=>{
+  s.classList.remove('active');
+ });
+ document.getElementById('s'+n).classList.add('active');
+}
+
+/* هەنگاوی یەکەم: کارەکتەر و تەقەکردن */
+
+const canvas=document.getElementById('art');
+const ctx=canvas.getContext('2d');
+
+function heartPath(cx,cy,scale){
+ const pts=[];
+ for(let t=0;t<Math.PI*2;t+=.12){
+  const x=16*Math.sin(t)**3;
+  const y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
+  pts.push({
+   x:cx+x*scale/32,
+   y:cy+y*scale/32
+  });
+ }
+ return pts;
+}
+
+function heart(x,y,size,color){
+ ctx.save();
+ ctx.translate(x,y);
+ ctx.scale(size/20,size/20);
+ ctx.fillStyle=color;
+ ctx.beginPath();
+ ctx.moveTo(0,7);
+ ctx.bezierCurveTo(-17,-4,-10,-15,0,-7);
+ ctx.bezierCurveTo(10,-15,17,-4,0,7);
+ ctx.fill();
+ ctx.restore();
+}
+
+const L=220,R=505,T=72,B=357;
+const outline=[];
+for(let x=L;x<=R;x+=18){
+ outline.push({x,y:T},{x,y:B});
+}
+for(let y=T+18;y<B;y+=18){
+ outline.push({x:L,y},{x:R,y});
+}
+
+const inside=heartPath(362,215,125);
+const muzzle={x:160,y:267};
+
+function shooter(){
+ ctx.fillStyle='#36203b';
+ ctx.fillRect(48,333,112,9);
+
+ ctx.fillStyle='#25334a';
+ ctx.fillRect(86,296,14,35);
+ ctx.fillRect(111,296,14,35);
+
+ ctx.fillStyle='#e8b68f';
+ ctx.fillRect(81,329,23,7);
+ ctx.fillRect(108,329,23,7);
+
+ ctx.fillStyle='#4b9b83';
+ ctx.fillRect(83,251,43,48);
+ ctx.fillRect(72,263,15,12);
+
+ ctx.fillStyle='#e8b68f';
+ ctx.fillRect(87,222,37,32);
+
+ ctx.fillStyle='#24172c';
+ ctx.fillRect(84,215,43,12);
+ ctx.fillRect(84,222,8,12);
+ ctx.fillRect(116,221,9,10);
+
+ ctx.fillStyle='white';
+ ctx.fillRect(111,232,4,4);
+
+ ctx.fillStyle='#b9c1d0';
+ ctx.fillRect(119,260,37,7);
+ ctx.fillRect(147,257,14,5);
+
+ ctx.fillStyle='#6d7385';
+ ctx.fillRect(128,267,6,9);
+}
+
+let start=0;
+let finished=false;
+
+function draw(now){
+ if(!start)start=now;
+
+ const elapsed=(now-start)/1000;
+
+ ctx.clearRect(0,0,720,440);
+
+ for(let i=0;i<35;i++){
+  ctx.fillStyle='#fff2';
+  ctx.fillRect((i*97)%720,(i*53)%440,3,3);
+ }
+
+ shooter();
+
+ const interval=.105;
+ const travel=.28;
+
+ function drawShots(points,offset,color,size){
+  points.forEach((p,i)=>{
+   const shotTime=offset+i*interval;
+   const progress=Math.max(0,Math.min(1,(elapsed-shotTime)/travel));
+
+   if(elapsed>=shotTime){
+    if(progress>=1){
+     heart(p.x,p.y,size,color);
+    }else{
+     const q=progress*progress*(3-2*progress);
+
+     heart(
+      muzzle.x+(p.x-muzzle.x)*q,
+      muzzle.y+(p.y-muzzle.y)*q,
+      9,
+      '#fff0a8'
+     );
+
+     ctx.beginPath();
+     ctx.strokeStyle='#ff8db6aa';
+     ctx.lineWidth=2;
+     ctx.moveTo(muzzle.x,muzzle.y);
+     ctx.lineTo(
+      muzzle.x+(p.x-muzzle.x)*q,
+      muzzle.y+(p.y-muzzle.y)*q
+     );
+     ctx.stroke();
+    }
+   }
+  });
+ }
+
+ drawShots(outline,0,'#ff5c9b',14);
+
+ const innerStart=outline.length*interval+travel+.45;
+
+ drawShots(inside,innerStart,'#ffb2d0',13);
+
+ const end=innerStart+(inside.length-1)*interval+travel+.3;
+
+ if(elapsed>end&&!finished){
+  finished=true;
+  document.getElementById('status').textContent=
+  'تەواو بوو؛ چوارچێوەیەک لە دڵ و دڵێک لە ناویدا بۆ تۆ ❤️';
+
+  document.getElementById('next1').disabled=false;
+ }
+
+ if(!finished){
+  requestAnimationFrame(draw);
+ }
+}
+
+requestAnimationFrame(draw);
+
+/* کلیل */
+
+function unlock(){
+ const v=document.getElementById('answer').value
+ .trim().toLowerCase().replace(/\s/g,'');
+
+ if(['هێدی','هيدي','هیدی','hedi'].includes(v)){
+  showScreen(4);
+  showMessage();
+ }else{
+  document.getElementById('error').textContent=
+  'کلیلەکە ناوی هێدییە، جارێکی تر هەوڵ بدە ❤️';
+ }
+}
+
+/* دە پەیام بە دوگمە */
+
+const messages=[
+'١. هەنۆکە، تۆ ئەو جوانییەیت کە بە وشە ناتوانرێت وەسف بکرێت. 🥹🌷❤️',
+
+'٢. کاتێک بیرت دەکەمەوە، خەندەیەک بەبێ هۆکار دێتە سەر لێوم. 😊💗',
+
+'٣. گیانەکەم، بوونت لە ژیانمدا وەک ڕووناکییە لە دوای تاریکی. ✨🌙',
+
+'٤. ڕوحەکەم، هیوادارم هەمیشە دڵت پڕ بێت لە ئارامی و خۆشی. 🫶🏻🕊️',
+
+'٥. دڵەکەم، هەر وردەکارییەکی تۆ لام جوان و تایبەتە. 🌸💞',
+
+'٦. ئەگەر خۆشی شێوەیەکی هەبوایە، بێگومان شێوەی خەندەی تۆی دەبوو. 😍🌹',
+
+'٧. گیانم، تۆ پێویست ناکات تەواو بیت؛ هەر بەو شێوەیەی کەیت جوانیت. 💕🥺',
+
+'٨. دەمەوێت هەر ڕۆژێک هۆکارێک هەبێت بۆ ئەوەی پێت بخەنم. 😘💐',
+
+'٩. لە نێو هەموو جوانییەکانی ئەم جیهانەدا، خەندەی تۆ جێگایەکی تایبەتی هەیە. 🌍❤️',
+
+'١٠. هەنۆکەی دڵم، ئەم پەیامانە کەمەن بەرامبەر ئەو هەستە جوانەی کە دەمەوێت پێت بڵێم. 💍💖🦋'
+];
+
+let current=0;
+
+function showMessage(){
+ document.getElementById('message').textContent=messages[current];
+
+ document.getElementById('counter').textContent=
+ 'پەیامی '+(current+1)+' لە ١٠';
+
+ if(current===9){
+  document.getElementById('nextMessage').textContent='تەواو بوو ❤️';
+ }else{
+  document.getElementById('nextMessage').textContent='پەیامی داهاتوو 💗';
+ }
+}
+
+function nextMsg(){
+ if(current<9){
+  current++;
+  showMessage();
+ }else{
+  document.getElementById('message').textContent=
+  'هەنۆکەی جوانم، هەمیشە بە خەندەوە بمێنەوە. ❤️🥹🌹';
+
+  document.getElementById('counter').textContent='بە خۆشەویستییەوە';
+
+  document.getElementById('nextMessage').style.display='none';
+
+  document.getElementById('endText').textContent=
+  'لەگەڵ هەموو خۆشەویستییەکەوە، هێدی ❤️';
+ }
+}
+
+</script>
+</body>
+</html>
